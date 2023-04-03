@@ -7,7 +7,16 @@ namespace OTelMetricsSample.API.Controllers
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase
     {
-        private static readonly Counter<int> _getCounter = MetricSource.Meter.CreateCounter<int>("get-requests");
+        public const string MeterName = "OTelMetricsSample.API";
+
+        internal static readonly Meter Meter = new(MeterName);
+
+
+        private static             
+        readonly Counter<int> _requestsCounter = Meter.CreateCounter<int>(
+            "http-requests",
+            unit: "HTTP Requests",
+            description: "Number of Requests received");
 
         private static readonly string[] Summaries = new[]
         {
@@ -25,6 +34,10 @@ namespace OTelMetricsSample.API.Controllers
         [HttpGet]
         public IEnumerable<WeatherForecast> Get()
         {
+            _requestsCounter.Add(1,
+                new("Verb", "GET"),
+                new("Controller", "WeatherForecast"));
+
             return Enumerable.Range(1, 5).Select(index => new WeatherForecast
             {
                 Date = DateTime.Now.AddDays(index),
