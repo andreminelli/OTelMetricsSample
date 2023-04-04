@@ -7,13 +7,10 @@ namespace OTelMetricsSample.API.Controllers
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase
     {
-        public const string MeterName = "OTelMetricsSample.API";
-
-        internal static readonly Meter Meter = new(MeterName);
-
-
-        private static             
-        readonly Counter<int> _requestsCounter = Meter.CreateCounter<int>(
+        // This is a educational code. 
+        // On production code you should apply encapsulation best practices, as needed.
+        // For instance, a base Controller class, a Filter or a Middleware should be used instead.
+        private static readonly Counter<int> _requestsCounter = MetricSource.Meter.CreateCounter<int>(
             "http-requests",
             unit: "HTTP Requests",
             description: "Number of Requests received");
