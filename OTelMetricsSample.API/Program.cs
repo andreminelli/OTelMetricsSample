@@ -11,6 +11,9 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 app.UseRouting();
 app.UseAuthorization();
+
+app.UseMiddleware<MetricsMiddleware>();
+
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapMetrics();
