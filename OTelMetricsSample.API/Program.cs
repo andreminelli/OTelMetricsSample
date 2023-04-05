@@ -4,7 +4,6 @@ using Prometheus;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
 
 var app = builder.Build();
@@ -19,16 +18,13 @@ app.UseEndpoints(endpoints =>
     Metrics.ConfigureMeterAdapter(options =>
     {
         options.ResolveHistogramBuckets = instrument =>
-        { 
-            switch(instrument.Name)
+        {
+            return instrument.Unit switch
             {
-                //case "http-requests-duration":
-                //    return new double[] { 0.001, 0.010, 0.050, 0.100, 0.200, 0.500, 1, 2, 5 };
-                case "http-requests-duration":
-                    return Histogram.ExponentialBuckets(0.001, 2, 14);
-                default:
-                    return MeterAdapterOptions.DefaultHistogramBuckets;
-            }
+                "Seconds" => Histogram.ExponentialBuckets(0.001, 2, 14),
+                "Bytes" => new double[] { 1, 1000, 2000, 5000, 10000, 20000, 50000, 85000 },
+                _ => MeterAdapterOptions.DefaultHistogramBuckets,
+            };
         };
         options.InstrumentFilterPredicate = instrument =>
         {
