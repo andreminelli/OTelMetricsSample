@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 using System.Diagnostics.Metrics;
 
 namespace OTelMetricsSample.API.Controllers
@@ -14,6 +15,11 @@ namespace OTelMetricsSample.API.Controllers
             "http-requests",
             unit: "HTTP Requests",
             description: "Number of Requests received");
+
+        private static readonly Histogram<double> _requestsDuration = MetricSource.Meter.CreateHistogram<double>(
+            "http-requests-duration",
+            unit: "Seconds",
+            description: "Duration of Requests received");
 
         private static readonly string[] Summaries = new[]
         {
@@ -35,13 +41,25 @@ namespace OTelMetricsSample.API.Controllers
                 new("Verb", "GET"),
                 new("Controller", "WeatherForecast"));
 
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
+            try
             {
-                Date = DateTime.Now.AddDays(index),
-                TemperatureC = Random.Shared.Next(-20, 55),
-                Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-            })
-            .ToArray();
+                return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+                {
+                    Date = DateTime.Now.AddDays(index),
+                    TemperatureC = Random.Shared.Next(-20, 55),
+                    Summary = Summaries[Random.Shared.Next(Summaries.Length)]
+                })
+                .ToArray();
+            }
+            finally
+            {
+                stopWatch.Stop();
+                _requestsDuration.Record(stopWatch.Elapsed.TotalSeconds,
+                    new("Verb", "GET"),
+                    new("Controller", "WeatherForecast"));
+            }
         }
     }
 }
