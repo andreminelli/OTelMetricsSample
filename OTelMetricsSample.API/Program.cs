@@ -14,6 +14,8 @@ app.UseAuthorization();
 
 app.UseMiddleware<MetricsMiddleware>();
 
+app.MapControllers();
+
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapMetrics();
@@ -41,7 +43,5 @@ app.UseEndpoints(endpoints =>
         SuppressDebugMetrics = true
     });
 });
-
-app.MapControllers();
 
 app.Run();
