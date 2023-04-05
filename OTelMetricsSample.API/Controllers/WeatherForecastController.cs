@@ -8,7 +8,7 @@ namespace OTelMetricsSample.API.Controllers
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase
     {
-        // This is demonstration code. 
+        // These metrics are demonstration code. 
         // On production code you should apply encapsulation best practices, as needed.
         // For instance, a base Controller class, a Filter or a Middleware should be used instead.
         private static readonly Counter<int> _requestsCounter = MetricSource.Meter.CreateCounter<int>(
@@ -16,9 +16,7 @@ namespace OTelMetricsSample.API.Controllers
             unit: "HTTP Requests",
             description: "Number of Requests received");
 
-        private static 
-            
-            readonly Histogram<double> _requestsDuration = MetricSource.Meter.CreateHistogram<double>(
+        private static readonly Histogram<double> _requestsDuration = MetricSource.Meter.CreateHistogram<double>(
             "http-requests-duration",
             unit: "Seconds",
             description: "Duration of Requests received");
@@ -27,14 +25,6 @@ namespace OTelMetricsSample.API.Controllers
         {
             "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
         };
-
-        private readonly ILogger<WeatherForecastController> _logger;
-
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
-        {
-            _logger = logger;
-
-        }
 
         [HttpGet]
         public async Task<IEnumerable<WeatherForecast>> GetAsync()
