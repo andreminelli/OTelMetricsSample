@@ -16,7 +16,9 @@ namespace OTelMetricsSample.API.Controllers
             unit: "HTTP Requests",
             description: "Number of Requests received");
 
-        private static readonly Histogram<double> _requestsDuration = MetricSource.Meter.CreateHistogram<double>(
+        private static 
+            
+            readonly Histogram<double> _requestsDuration = MetricSource.Meter.CreateHistogram<double>(
             "http-requests-duration",
             unit: "Seconds",
             description: "Duration of Requests received");
@@ -35,7 +37,7 @@ namespace OTelMetricsSample.API.Controllers
         }
 
         [HttpGet]
-        public IEnumerable<WeatherForecast> Get()
+        public async Task<IEnumerable<WeatherForecast>> GetAsync()
         {
             _requestsCounter.Add(1,
                 new("Verb", "GET"),
@@ -45,6 +47,7 @@ namespace OTelMetricsSample.API.Controllers
             stopWatch.Start();
             try
             {
+                await Task.Delay(Random.Shared.Next(3000));
                 return Enumerable.Range(1, 5).Select(index => new WeatherForecast
                 {
                     Date = DateTime.Now.AddDays(index),
