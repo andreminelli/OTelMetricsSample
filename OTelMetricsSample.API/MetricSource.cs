@@ -6,6 +6,6 @@ namespace OTelMetricsSample.API
     {
         public const string MeterName = "OTelMetricsSample.API";
 
-        internal static readonly Meter Meter = new(MeterName);
+        internal static Meter Meter { get; } = new(MeterName);
     }
 }
