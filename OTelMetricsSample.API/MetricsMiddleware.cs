@@ -2,6 +2,8 @@
 
 namespace OTelMetricsSample.API
 {
+    // By using a "convention-based middleware", the class is created 
+    // at startup, which means it is a singleton
     public class MetricsMiddleware
     {
         private readonly RequestDelegate _next;
@@ -18,14 +20,14 @@ namespace OTelMetricsSample.API
             _next = next;
 
             _requestsInflightGauge = MetricSource.Meter.CreateObservableGauge<int>(
-                "http-requests-inflight",
+                "http.requests.inflight",
                 ObserveInflighRequests,
                 unit: "HTTP Requests",
                 description: "Number of Requests being served");
 
             _requestsTotalCounter =
                 MetricSource.Meter.CreateObservableCounter<int>(
-                    "http-requests-total",
+                    "http.requests.total",
                     ObserveTotalRequests,
                     unit: "HTTP Requests",
                     description: "Number of Requests being served");

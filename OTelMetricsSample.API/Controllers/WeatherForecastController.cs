@@ -12,14 +12,9 @@ namespace OTelMetricsSample.API.Controllers
         // On production code you should apply encapsulation best practices, as needed.
         // For instance, a base Controller class, a Filter or a Middleware should be used instead.
         private static readonly Counter<int> _requestsCounter = MetricSource.Meter.CreateCounter<int>(
-            "http-requests",
+            "http.requests.count",
             unit: "HTTP Requests",
             description: "Number of Requests received");
-
-        private static readonly Histogram<double> _requestsDuration = MetricSource.Meter.CreateHistogram<double>(
-            "http-requests-duration",
-            unit: "Seconds",
-            description: "Duration of Requests received");
 
         private static readonly string[] Summaries = new[]
         {
@@ -27,32 +22,19 @@ namespace OTelMetricsSample.API.Controllers
         };
 
         [HttpGet]
-        public async Task<IEnumerable<WeatherForecast>> GetAsync()
+        public IEnumerable<WeatherForecast> Get()
         {
             _requestsCounter.Add(1,
-                new("Verb", "GET"),
-                new("Controller", "WeatherForecast"));
+                new("http.verb", "GET"),
+                new("app.controller", "WeatherForecast"));
 
-            var stopWatch = new Stopwatch();
-            stopWatch.Start();
-            try
+            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
             {
-                await Task.Delay(Random.Shared.Next(3000));
-                return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-                {
-                    Date = DateTime.Now.AddDays(index),
-                    TemperatureC = Random.Shared.Next(-20, 55),
-                    Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-                })
-                .ToArray();
-            }
-            finally
-            {
-                stopWatch.Stop();
-                _requestsDuration.Record(stopWatch.Elapsed.TotalSeconds,
-                    new("Verb", "GET"),
-                    new("Controller", "WeatherForecast"));
-            }
+                Date = DateTime.Now.AddDays(index),
+                TemperatureC = Random.Shared.Next(-20, 55),
+                Summary = Summaries[Random.Shared.Next(Summaries.Length)]
+            })
+            .ToArray();
         }
     }
 }
