@@ -6,6 +6,9 @@ namespace OTelMetricsSample.API.Tests
     [TestClass]
     public class MetricsMiddlewareTests
     {
+        private const string TotalMetricName = "http-requests-total";
+        private const string InflightMetricName = "http-requests-inflight";
+
         private MeterListener _meterListener;
         private RequestDelegate _next;
         private HttpContext _httpContext;
@@ -38,7 +41,7 @@ namespace OTelMetricsSample.API.Tests
             {
                 InstrumentPublished = (instrument, listener) =>
                 {
-                    if (instrument.Meter.Name == MetricSource.MeterName)
+                    if (instrument.Name == TotalMetricName)
                     {
                         listener.EnableMeasurementEvents(instrument);
                     }
@@ -47,7 +50,7 @@ namespace OTelMetricsSample.API.Tests
             _meterListener.SetMeasurementEventCallback<int>(
                 (instrument, measurement, tags, state) =>
                 {
-                    if (instrument.Name == "http-requests-total") receivedMeasurement = measurement;
+                    receivedMeasurement = measurement;
                 });
             _meterListener.Start();
 
@@ -59,7 +62,38 @@ namespace OTelMetricsSample.API.Tests
             // Assert
             _meterListener.RecordObservableInstruments();
             receivedMeasurement.ShouldBe(requests);
-            _meterListener?.Dispose();
+        }
+
+        [TestMethod]
+        public async Task RegisterInflightMetric()
+        {
+            // Arrange
+            var receivedMeasurement = -1;
+            _meterListener = new MeterListener
+            {
+                InstrumentPublished = (instrument, listener) =>
+                {
+                    if (instrument.Name == InflightMetricName)
+                    {
+                        listener.EnableMeasurementEvents(instrument);
+                    }
+                }
+            };
+            _meterListener.SetMeasurementEventCallback<int>(
+                (instrument, measurement, tags, state) =>
+                {
+                    receivedMeasurement = measurement;
+                });
+            _meterListener.Start();
+
+            // Act
+            //await Parallel.ForEachAsync(
+            //    Enumerable.Repeat(0, requests),
+            //    async (_, _) => await _target.InvokeAsync(_httpContext));
+
+            //// Assert
+            //_meterListener.RecordObservableInstruments();
+            //receivedMeasurement.ShouldBe(requests);
         }
 
         [TestCleanup]
